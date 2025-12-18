@@ -99,7 +99,7 @@ function App() {
                   {songs.map((song) => (
                     <TableRow key={song.id}>
                       <TableCell className="font-medium">
-                        {song['song-name'] || 'N/A'}
+                        {song['song - name'] || song['song-name'] || 'N/A'}
                       </TableCell>
                       <TableCell>{song.artist || 'N/A'}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
