@@ -1,20 +1,20 @@
 # DJ Song Request Management System
 
-A web application for DJs to manage song requests from their Telegram bot.
+A web application for DJs to manage song requests from their Telegram bot. Built with React and Supabase.
 
 ## Features
 
 - View all song requests
-- Mark songs as Approved/Declined/About to Play
+- Mark songs as Approved/Declined/About to Play/Saved
 - Real-time updates (polls every 5 seconds)
 - Modern UI with shadcn/ui components
 - Responsive design
+- Direct Supabase integration (no backend needed)
 
 ## Tech Stack
 
 - **Frontend**: React + Vite + shadcn/ui + Tailwind CSS
-- **Backend**: Node.js + Express
-- **Database**: Supabase
+- **Database**: Supabase (direct client connection)
 - **Deployment**: Vercel
 
 ## Setup
@@ -22,117 +22,107 @@ A web application for DJs to manage song requests from their Telegram bot.
 ### 1. Install Dependencies
 
 ```bash
-npm run install:all
+cd frontend
+npm install
 ```
 
-### 2. Set Up Supabase Database
+### 2. Configure Environment Variables
 
-1. Go to your Supabase project dashboard
-2. Navigate to SQL Editor
-3. Run the SQL script from `supabase-schema.sql` to create the `song_requests` table
+Create `frontend/.env` file:
 
-### 3. Configure Environment Variables
-
-#### Backend (`backend/.env`)
 ```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_anon_key
-PORT=3001
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_KEY=your_supabase_anon_key
+VITE_SUPABASE_TABLE=song_requests
 ```
 
-#### Frontend (`frontend/.env`)
-```env
-VITE_API_URL=http://localhost:3001
-```
+**Note:** `VITE_SUPABASE_TABLE` is optional - defaults to `song_requests` if not provided.
 
-### 4. Run Development Servers
+### 3. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-This will start both frontend (http://localhost:5173) and backend (http://localhost:3001) servers.
+Or from the root directory:
+```bash
+cd frontend && npm run dev
+```
+
+The app will be available at http://localhost:5173
 
 ## Database Schema
 
-The `song_requests` table has the following structure:
+Your Supabase table should have the following structure:
 - `id` (uuid, primary key)
-- `song_title` (text, required)
+- `song-name` (text) - Note: hyphenated column name
 - `artist` (text, optional)
-- `requester_name` (text, optional)
-- `requester_id` (text, optional - Telegram user ID)
-- `status` (text, default: 'pending') - Values: 'pending', 'approved', 'declined', 'about_to_play'
-- `created_at` (timestamp, auto-generated)
-- `updated_at` (timestamp, auto-updated)
-
-## API Endpoints
-
-### GET `/api/songs`
-Get all song requests, ordered by creation date (newest first).
-
-### PATCH `/api/songs/:id`
-Update a song's status. Body: `{ "status": "approved" | "declined" | "about_to_play" }`
-
-### GET `/api/health`
-Health check endpoint.
+- `user_id` (text, optional - Telegram user ID)
+- `link` (text, optional)
+- `status` (text, optional) - Values: `NULL`, `'Saved'`, `'Approved'`, `'Declined'`, `'About to Play'`
+- `created_at` (timestamptz, auto-generated)
 
 ## Deployment to Vercel
 
-### Option 1: Deploy Frontend and Backend Separately
+### Option 1: Deploy from Root Directory
 
-1. **Deploy Backend:**
-   - Go to Vercel dashboard
-   - Import your repository
-   - Set root directory to `backend`
-   - Add environment variables (SUPABASE_URL, SUPABASE_KEY)
-   - Deploy
+1. Push your code to GitHub (already done)
+2. Go to [Vercel Dashboard](https://vercel.com)
+3. Import your repository: `UNIxyty/songs`
+4. Configure build settings:
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm install && npm run build`
+   - **Output Directory**: `dist`
+5. Add environment variables:
+   - `VITE_SUPABASE_URL` - Your Supabase project URL
+   - `VITE_SUPABASE_KEY` - Your Supabase anon key
+   - `VITE_SUPABASE_TABLE` - (Optional) Table name, defaults to `song_requests`
+6. Deploy!
 
-2. **Deploy Frontend:**
-   - Create a new project in Vercel
-   - Set root directory to `frontend`
-   - Add environment variable: `VITE_API_URL` (your backend API URL)
-   - Deploy
+### Option 2: Deploy from Frontend Directory
 
-### Option 2: Monorepo Deployment
+1. In Vercel, set root directory to `frontend`
+2. Vercel will automatically detect Vite and configure build settings
+3. Add the same environment variables as above
 
-1. Push your code to GitHub:
-```bash
-git remote add origin <your-repo-url>
-git push -u origin master
+## Environment Variables for Vercel
+
+Add these in your Vercel project settings:
+
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_KEY` - Your Supabase anon/public key
+- `VITE_SUPABASE_TABLE` - (Optional) Your table name
+
+## Supabase Row Level Security (RLS)
+
+Make sure your Supabase table has the appropriate RLS policies to allow:
+- **SELECT** - To read song requests
+- **UPDATE** - To update song status
+
+Example policy (adjust based on your security needs):
+
+```sql
+-- Allow all operations (for development)
+CREATE POLICY "Allow all operations" ON song_requests
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
 ```
 
-2. In Vercel:
-   - Import your repository
-   - Configure build settings:
-     - Root Directory: `frontend`
-     - Build Command: `npm install && npm run build`
-     - Output Directory: `dist`
-   - Add environment variables
-   - For API routes, you may need to configure Vercel to handle `/api/*` routes separately
-
-### Environment Variables for Vercel
-
-**Backend:**
-- `SUPABASE_URL`
-- `SUPABASE_KEY`
-- `NODE_ENV=production`
-
-**Frontend:**
-- `VITE_API_URL` (your deployed backend URL)
-
-## Git Setup
-
-The repository is already initialized. To push to a remote:
-
-```bash
-git remote add origin <your-repo-url>
-git push -u origin master
-```
+For production, you may want to restrict access or add authentication.
 
 ## Usage
 
-1. Your Telegram bot should insert song requests into the `song_requests` table
+1. Your Telegram bot should insert song requests into the Supabase table
 2. Open the web dashboard
 3. View all requests in the table
-4. Click "Approve", "Decline", or "About to Play" to update the status
+4. Click "Approve", "Decline", "About to Play", or "Saved" to update the status
 5. The status updates are reflected immediately and synced with your database
+
+## Git Setup
+
+The repository is already initialized and pushed to GitHub:
+```bash
+git remote -v  # Check remote
+git push       # Push updates
+```

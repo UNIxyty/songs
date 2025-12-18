@@ -1,18 +1,34 @@
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-const api = axios.create({
-  baseURL: `${API_URL}/api`,
-});
+// Get table name from environment or use default
+const TABLE_NAME = import.meta.env.VITE_SUPABASE_TABLE || 'song_requests';
 
 export const getSongs = async () => {
-  const response = await api.get('/songs');
-  return response.data;
+  const { data, error } = await supabase
+    .from(TABLE_NAME)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
 };
 
 export const updateSongStatus = async (id, status) => {
-  const response = await api.patch(`/songs/${id}`, { status });
-  return response.data;
-};
+  // Match your existing status values: NULL, 'Saved', 'Approved', 'Declined', 'About to Play'
+  const validStatuses = ['Saved', 'Approved', 'Declined', 'About to Play'];
+  if (status && !validStatuses.includes(status)) {
+    throw new Error('Invalid status');
+  }
 
+  const { data, error } = await supabase
+    .from(TABLE_NAME)
+    .update({ 
+      status: status || null
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
