@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
 // Get table name from environment or use default
-const TABLE_NAME = import.meta.env.VITE_SUPABASE_TABLE || 'song_requests';
+const TABLE_NAME = import.meta.env.VITE_SUPABASE_TABLE || 'links';
 
 export const getSongs = async () => {
   const { data, error } = await supabase
