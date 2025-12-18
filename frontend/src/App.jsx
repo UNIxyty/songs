@@ -119,10 +119,10 @@ function App() {
                       <TableCell className="max-w-xs truncate">
                         {song.link ? (
                           <a 
-                            href={song.link} 
+                            href={song.link.startsWith('http') ? song.link : `https://${song.link}`}
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-primary hover:underline"
+                            className="text-primary hover:underline cursor-pointer"
                           >
                             {song.link.length > 30 ? song.link.substring(0, 30) + '...' : song.link}
                           </a>
