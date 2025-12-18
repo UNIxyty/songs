@@ -56,6 +56,17 @@ function App() {
     }
   };
 
+  const getStatusBadgeClassName = (status) => {
+    switch (status) {
+      case 'Approved':
+        return 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600';
+      case 'About to Play':
+        return 'bg-green-500 text-white border-green-500 hover:bg-green-600';
+      default:
+        return '';
+    }
+  };
+
   const getStatusLabel = (status) => {
     if (!status || status === 'null') return 'Pending';
     return status;
@@ -70,7 +81,7 @@ function App() {
       <div className="max-w-7xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">DJ Song Requests</CardTitle>
+            <CardTitle className="text-3xl">Song Requests</CardTitle>
             <CardDescription>
               Manage song requests from your Telegram bot
             </CardDescription>
@@ -118,7 +129,10 @@ function App() {
                         ) : 'N/A'}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadgeVariant(song.status)}>
+                        <Badge 
+                          variant={getStatusBadgeVariant(song.status)}
+                          className={getStatusBadgeClassName(song.status)}
+                        >
                           {getStatusLabel(song.status)}
                         </Badge>
                       </TableCell>
