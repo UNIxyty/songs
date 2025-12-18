@@ -43,30 +43,22 @@ function App() {
 
   const getStatusBadgeVariant = (status) => {
     switch (status) {
-      case 'approved':
+      case 'Approved':
         return 'default';
-      case 'declined':
+      case 'Declined':
         return 'destructive';
-      case 'about_to_play':
+      case 'About to Play':
         return 'secondary';
+      case 'Saved':
+        return 'outline';
       default:
         return 'outline';
     }
   };
 
   const getStatusLabel = (status) => {
-    switch (status) {
-      case 'approved':
-        return 'Approved';
-      case 'declined':
-        return 'Declined';
-      case 'about_to_play':
-        return 'About to Play';
-      case 'pending':
-        return 'Pending';
-      default:
-        return status;
-    }
+    if (!status || status === 'null') return 'Pending';
+    return status;
   };
 
   const formatDate = (dateString) => {
@@ -96,7 +88,8 @@ function App() {
                   <TableRow>
                     <TableHead>Song</TableHead>
                     <TableHead>Artist</TableHead>
-                    <TableHead>Requester</TableHead>
+                    <TableHead>User ID</TableHead>
+                    <TableHead>Link</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Requested At</TableHead>
                     <TableHead>Actions</TableHead>
@@ -106,10 +99,24 @@ function App() {
                   {songs.map((song) => (
                     <TableRow key={song.id}>
                       <TableCell className="font-medium">
-                        {song.song_title || 'N/A'}
+                        {song['song-name'] || 'N/A'}
                       </TableCell>
                       <TableCell>{song.artist || 'N/A'}</TableCell>
-                      <TableCell>{song.requester_name || 'Anonymous'}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {song.user_id || 'N/A'}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {song.link ? (
+                          <a 
+                            href={song.link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            {song.link.length > 30 ? song.link.substring(0, 30) + '...' : song.link}
+                          </a>
+                        ) : 'N/A'}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={getStatusBadgeVariant(song.status)}>
                           {getStatusLabel(song.status)}
@@ -119,30 +126,38 @@ function App() {
                         {formatDate(song.created_at)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <Button
                             size="sm"
-                            variant={song.status === 'approved' ? 'default' : 'outline'}
-                            onClick={() => handleStatusUpdate(song.id, 'approved')}
+                            variant={song.status === 'Approved' ? 'default' : 'outline'}
+                            onClick={() => handleStatusUpdate(song.id, 'Approved')}
                             disabled={updating === song.id}
                           >
                             {updating === song.id ? '...' : 'Approve'}
                           </Button>
                           <Button
                             size="sm"
-                            variant={song.status === 'declined' ? 'destructive' : 'outline'}
-                            onClick={() => handleStatusUpdate(song.id, 'declined')}
+                            variant={song.status === 'Declined' ? 'destructive' : 'outline'}
+                            onClick={() => handleStatusUpdate(song.id, 'Declined')}
                             disabled={updating === song.id}
                           >
                             {updating === song.id ? '...' : 'Decline'}
                           </Button>
                           <Button
                             size="sm"
-                            variant={song.status === 'about_to_play' ? 'secondary' : 'outline'}
-                            onClick={() => handleStatusUpdate(song.id, 'about_to_play')}
+                            variant={song.status === 'About to Play' ? 'secondary' : 'outline'}
+                            onClick={() => handleStatusUpdate(song.id, 'About to Play')}
                             disabled={updating === song.id}
                           >
                             {updating === song.id ? '...' : 'About to Play'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={song.status === 'Saved' ? 'secondary' : 'outline'}
+                            onClick={() => handleStatusUpdate(song.id, 'Saved')}
+                            disabled={updating === song.id}
+                          >
+                            {updating === song.id ? '...' : 'Saved'}
                           </Button>
                         </div>
                       </TableCell>

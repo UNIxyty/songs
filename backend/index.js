@@ -39,15 +39,16 @@ app.patch('/api/songs/:id', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['pending', 'approved', 'declined', 'about_to_play'].includes(status)) {
+    // Match your existing status values: NULL, 'Saved', 'Approved', 'Declined', 'About to Play'
+    const validStatuses = ['Saved', 'Approved', 'Declined', 'About to Play'];
+    if (status && !validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
     const { data, error } = await supabase
       .from('song_requests')
       .update({ 
-        status,
-        updated_at: new Date().toISOString()
+        status: status || null
       })
       .eq('id', id)
       .select()
